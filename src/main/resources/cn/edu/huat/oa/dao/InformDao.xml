@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.4//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.huat.oa.dao.InformDao">
+    <resultMap id="inform" type="cn.edu.huat.oa.entity.Inform">
+        <id property="id" column="id" javaType="Integer"/>
+        <result property="createSn" column="create_sn" javaType="String"/>
+        <result property="receiveDsn" column="receive_dsn" javaType="String"/>
+        <result property="createTime" column="create_time" javaType="java.util.Date"/>
+        <result property="informContent" column="inform_content" javaType="String"/>
+        <association property="creater" column="create_sn" javaType="cn.edu.huat.oa.entity.Employee">
+            <result property="name" column="ename" javaType="String"/>
+            <result property="post" column="epost" javaType="String"/>
+        </association>
+        <association property="department" column="receive_dsn" javaType="cn.edu.huat.oa.entity.Department" >
+            <result property="name" column="dname" javaType="String"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="cn.edu.huat.oa.entity.Inform">
+        insert into inform(id,create_sn,receive_dsn,create_time,inform_content)
+        values(#{id},#{createSn},#{receiveDsn},#{createTime},#{informContent})
+    </insert>
+
+    <delete id="delete" parameterType="int">
+        delete from inform where id=#{id}
+    </delete>
+
+    <delete id="deleteBatch" parameterType="java.util.Arrays">
+        delete from inform where id in
+        <foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="select" parameterType="int" resultMap="inform">
+        select i.*,e.name ename,e.post epost,d.name dname from inform i left join employee e on i.create_sn=e.sn left join department d on i.receive_dsn=d.sn
+        where i.id=#{id}
+    </select>
+
+    <select id="selectBySn" parameterType="String" resultMap="inform">
+        select i.*,e.name ename,e.post epost,d.name dname from inform i left join employee e on i.create_sn=e.sn left join department d on i.receive_dsn=d.sn
+        where i.create_sn=#{sn} order by id desc
+    </select>
+
+    <select id="selectBySnAndText" resultMap="inform">
+        select i.*,e.name ename,e.post epost,d.name dname from inform i left join employee e on i.create_sn=e.sn left join department d on i.receive_dsn=d.sn
+        where i.create_sn=#{sn} and i.inform_content like concat('%',#{text},'%') order by id desc
+    </select>
+    <select id="selectByDsn" resultMap="inform">
+        select i.*,e.name ename,e.post epost,d.name dname from inform i left join employee e on i.create_sn=e.sn left join department d on i.receive_dsn=d.sn
+        where i.receive_dsn=#{dsn} order by id desc
+    </select>
+
+
+    <update id="update" parameterType="cn.edu.huat.oa.entity.Inform">
+        update inform
+        <set>
+            <if test="createSn!=null">create_sn=#{createSn},</if>
+            <if test="receiveDsn!=null">receive_dsn=#{receiveDsn},</if>
+            <if test="createTime!=null">create_time=#{createTime},</if>
+            <if test="informContent!=null">inform_content=#{informContent},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>
